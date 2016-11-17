@@ -1,0 +1,6 @@
+v1
+
+[IFerr2DTMaterial]
+Assets/Extensions/Playish/Materials/DebugPolyTerrain.asset
+
+[Ferr2DT_PathTerrain]
