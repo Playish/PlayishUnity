@@ -1,13 +1,13 @@
 # =============== #
 # Unity generated #
 # =============== #
-/[Ll]ibrary/
-/[Tt]emp/
-/[Oo]bj/
-/[Bb]uild/
-/[Bb]uilds/
-/Assets/[Tt]ools
-/UnityGenerated
+**/[Ll]ibrary/
+**/[Tt]emp/
+**/[Oo]bj/
+**/[Bb]uild/
+**/[Bb]uilds/
+**/Assets/[Tt]ools
+**/UnityGenerated
 
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
