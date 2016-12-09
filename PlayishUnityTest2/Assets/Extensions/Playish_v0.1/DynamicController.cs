@@ -10,7 +10,7 @@ namespace Playish
 	public class DynamicController
 	{
 		public String name = "";
-		public int sendgravity = 0;
+		public int sendrotation = 0;
 		public int sendacceleration = 0;
 		public InputDefinition[] areas = new InputDefinition[0];
 

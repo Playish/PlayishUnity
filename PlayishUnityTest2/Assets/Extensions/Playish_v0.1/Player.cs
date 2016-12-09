@@ -23,6 +23,9 @@ namespace Playish
 
 		// ---- MARK: Player
 
+		/// <summary>
+		/// Gets the deviceId which is used to identify a player.
+		/// </summary>
 		public String getDeviceId()
 		{
 			return deviceId;
@@ -31,16 +34,28 @@ namespace Playish
 
 		// ---- MARK: Controller
 
+		/// <summary>
+		/// Returns true if player has a controller definition defined. Without the controller definition the input is useless.
+		/// </summary>
 		public bool hasController()
 		{
 			return controller != null;
 		}
 
+		/// <summary>
+		/// Gets the controller definition defined for the player. The definition is used by the plugin to interpret the input from 
+		/// connected controllers. Requests to change controllers is asynchronous so this method can be used to check which controller
+		/// the player currently has.
+		/// </summary>
 		public DynamicController getController()
 		{
 			return controller;
 		}
 
+		/// <summary>
+		/// Used by the plugin to change a players controller. If the game want to change a controller for a connected device see
+		/// PlayishManager.changeController(String deviceId (optional), String controllerName).
+		/// </summary>
 		public void setController(DynamicController controller)
 		{
 			this.controller = controller;
@@ -155,7 +170,7 @@ namespace Playish
 			}
 
 			// Sensors
-			if (controller.sendgravity == 1)
+			if (controller.sendrotation == 1)
 			{
 				if (currentCharPos + 7 >= input.Length)
 				{

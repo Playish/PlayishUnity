@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.Linq;
 
 
 namespace Playish
@@ -9,8 +10,23 @@ namespace Playish
 	[DisallowMultipleComponent]
 	public class PlayishManager : MonoBehaviour
 	{
+		// General
 		private static PlayishManager currentInstance = null;
 		private const String VERSION = "0.1";
+
+		// Events
+		public delegate void PlayishStateChanged (EventArgs e);
+		/// <summary>
+		/// Occurs when a playish console pauses the game.
+		/// </summary>
+		public event PlayishStateChanged playishPauseEvent;
+		/// <summary>
+		/// Occurs when a playish console resumes the game.
+		/// </summary>
+		public event PlayishStateChanged playishResumeEvent;
+
+		// Keep track of playish state
+		private bool consoleIsPaused = false;
 
 
 		// ---- MARK: Setup
@@ -42,6 +58,18 @@ namespace Playish
 		}
 
 
+		// ---- MARK: Playish state
+
+		/// <summary>
+		/// Gets if the console is paused. "playishPauseEvent" and "playishResumeEvent" can also be 
+		/// helpful to keep track of the console state.
+		/// </summary>
+		public bool isConsolePaused()
+		{
+			return consoleIsPaused;
+		}
+
+
 		// ---- MARK: Update
 
 		#if UNITY_EDITOR
@@ -61,24 +89,69 @@ namespace Playish
 
 		// ---- MARK: Ingoing communication
 
+		/// <summary>
+		/// Should not be called directly. Used by the browser to communicate to the game.
+		/// </summary>
+		public void onPause()
+		{
+			consoleIsPaused = true;
+			if (playishPauseEvent != null)
+			{
+				playishPauseEvent (new EventArgs());
+			}
+		}
+
+		/// <summary>
+		/// Should not be called directly. Used by the browser to communicate to the game.
+		/// </summary>
+		public void onResume()
+		{
+			consoleIsPaused = false;
+			if (playishResumeEvent != null)
+			{
+				playishResumeEvent (new EventArgs());
+			}
+		}
+
+		/// <summary>
+		/// Should not be called directly. Used by the browser to communicate to the game.
+		/// </summary>
 		public void onControllerInput(string data)
 		{
 			parseAndSetInput (data);
 		}
 
+		/// <summary>
+		/// Should not be called directly. Used by the browser to communicate to the game.
+		/// </summary>
 		public void onPlayerSync(string data)
 		{
-			var deviceIds = data.Split (new char[]{ ';' }, StringSplitOptions.RemoveEmptyEntries);
 			var playerManager = PlayerManager.getInstance ();
-			playerManager.clearPlayers ();
+
+			var deviceIds = data.Split (new char[]{ ';' }, StringSplitOptions.RemoveEmptyEntries);
+			var existingDeviceIds = playerManager.players.Keys.ToList ();
 
 			for (int i = 0; i < deviceIds.Length; i++)
 			{
-				var player = new Player (data);
-				playerManager.addPlayer (player);
+				var playerDeviceId = deviceIds [i];
+				existingDeviceIds.Remove (playerDeviceId);
+
+				if (!playerManager.players.ContainsKey (playerDeviceId))
+				{
+					var player = new Player (playerDeviceId);
+					playerManager.addPlayer (player);
+				}
+			}
+
+			for (int i = 0; i < existingDeviceIds.Count; i++)
+			{
+				playerManager.removePlayer (existingDeviceIds[i]);
 			}
 		}
 
+		/// <summary>
+		/// Should not be called directly. Used by the browser to communicate to the game.
+		/// </summary>
 		public void onPlayerConnected(string data)
 		{
 			if (data.Length > 0)
@@ -91,6 +164,9 @@ namespace Playish
 			}
 		}
 
+		/// <summary>
+		/// Should not be called directly. Used by the browser to communicate to the game.
+		/// </summary>
 		public void onPlayerDisconnected(string data)
 		{
 			if (data.Length > 0)
@@ -99,6 +175,9 @@ namespace Playish
 			}
 		}
 
+		/// <summary>
+		/// Should not be called directly. Used by the browser to communicate to the game.
+		/// </summary>
 		public void onControllerChanged(string data)
 		{
 			var controllerTuple = parseController (data);
@@ -112,6 +191,9 @@ namespace Playish
 			}
 		}
 
+		/// <summary>
+		/// Should not be called directly. Used by the browser to communicate to the game.
+		/// </summary>
 		public void onControllerChangedForAll(string data)
 		{
 			DynamicController controller = JsonUtility.FromJson<DynamicController> (data);
@@ -124,6 +206,9 @@ namespace Playish
 
 		// ---- MARK: Outgoing communication
 
+		/// <summary>
+		/// Sends to the console that the plugin was loaded and is ready to be used by the console. Should not be called directly.
+		/// </summary>
 		public void setUnityPlayishPluginLoaded()
 		{
 			#if UNITY_WEBGL
@@ -133,16 +218,21 @@ namespace Playish
 			#endif
 		}
 
+		/// <summary>
+		/// Changes the controller for a specific device. Not implemented in this plugin-version, will become available in the future.
+		/// </summary>
 		public void changeController(String deviceId, String controllerName)
 		{
 			#if UNITY_WEBGL
 
-			// Will be implemented in future updates!
-			//Application.ExternalCall("PlayishUnityChangeController", deviceId, controllerName);
+			Application.ExternalCall("PlayishUnityChangeController", deviceId, controllerName);
 
 			#endif
 		}
 
+		/// <summary>
+		/// Changes the controller for all connected devices.
+		/// </summary>
 		public void changeController(String controllerName)
 		{
 			#if UNITY_WEBGL

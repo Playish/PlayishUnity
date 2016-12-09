@@ -14,6 +14,9 @@ namespace Playish
 		private static PlayerManager currentInstance = null;
 
 		// Players
+		/// <summary>
+		/// The connected players to the console.
+		/// </summary>
 		public Dictionary<String, Player> players = new Dictionary<String, Player> ();
 
 		// Events
