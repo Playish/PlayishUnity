@@ -36,12 +36,20 @@ public class CubeMover : MonoBehaviour
 	void Update ()
 	{
 		var player = playerManager.getPlayer (playerDeviceId);
-		if (player == null || !player.hasController())
+		if (player == null || !player.hasController () || playishManager.isConsolePaused ())
+		{
+			rigidBody.velocity = Vector3.zero;
 			return;
+		}
 
 		var newVelocity = new Vector3 (0, 0, 0);
 
-		var rotationInput = new Quaternion (-player.getFloatInput ("rotationX"), -player.getFloatInput ("rotationZ"), -player.getFloatInput ("rotationY"), player.getFloatInput ("rotationW"));
+		var rotationInput = new Quaternion (
+			-player.getFloatInput ("rotationX"),
+			-player.getFloatInput ("rotationZ"),
+			-player.getFloatInput ("rotationY"),
+			player.getFloatInput ("rotationW"));
+		
 		transform.rotation = rotationInput;
 
 		if (player.getBoolInput ("buttonleft"))
@@ -106,11 +114,12 @@ public class CubeMover : MonoBehaviour
 		var accy = -player.getFloatInput ("accelerationZ");
 		var accz = -player.getFloatInput ("accelerationY");
 
-		rigidBody.velocity = newVelocity;
-	}
+		/*
+		newVelocity.x += accx * 1f;
+		newVelocity.y += accy * 1f;
+		newVelocity.z += accz * 1f;
+		*/
 
-	private bool isInDeadzone(float value, float granuality)
-	{
-		return (value > -granuality && value < granuality);
+		rigidBody.velocity = newVelocity;
 	}
 }

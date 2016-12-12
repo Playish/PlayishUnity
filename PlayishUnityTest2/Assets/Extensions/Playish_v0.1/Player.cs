@@ -44,8 +44,7 @@ namespace Playish
 
 		/// <summary>
 		/// Gets the controller definition defined for the player. The definition is used by the plugin to interpret the input from 
-		/// connected controllers. Requests to change controllers is asynchronous so this method can be used to check which controller
-		/// the player currently has.
+		/// connected controllers.
 		/// </summary>
 		public DynamicController getController()
 		{

@@ -5,6 +5,7 @@ using System.Linq;
 
 using Playish;
 using UnityEngine.UI;
+using System;
 
 
 public class CubeSpawner : MonoBehaviour
@@ -15,6 +16,7 @@ public class CubeSpawner : MonoBehaviour
 	// UI Canvas
 	public GameObject canvas;
 	public Font font;
+	private PausedText pausedText = new PausedText ();
 
 	// Playish references
 	private PlayerManager playerManager;
@@ -37,6 +39,11 @@ public class CubeSpawner : MonoBehaviour
 		playerManager.playersChangedEvent += onPlayersChanged;
 
 		playishManager = PlayishManager.getInstance ();
+		playishManager.playishPauseEvent += onBrowserPaused;
+		playishManager.playishResumeEvent += onBrowserResumed;
+
+		// Send start controller
+		playishManager.changeController("PlayishRemoteController");
 	}
 
 
@@ -56,6 +63,19 @@ public class CubeSpawner : MonoBehaviour
 
 	private void onPlayersChanged(PlayerManager.PlayerEventArgs e)
 	{}
+
+
+	// ---- MARK: Browser pause events
+
+	private void onBrowserPaused(EventArgs e)
+	{
+		pausedText.spawnUIParts (ref canvas, ref font);
+	}
+
+	private void onBrowserResumed(EventArgs e)
+	{
+		pausedText.removeUIParts ();
+	}
 
 
 	// ---- MARK: Cube controller management
@@ -191,7 +211,7 @@ public class CubeSpawner : MonoBehaviour
 				if (textComp != null)
 				{
 					textComp.text = "Player " + playerNumber + ", disconnected";
-					textComp.color = Color.grey;
+					textComp.color = Color.black;
 				}
 			}
 		}
@@ -207,6 +227,47 @@ public class CubeSpawner : MonoBehaviour
 					textComp.color = Color.white;
 				}
 			}
+		}
+	}
+
+	private class PausedText
+	{
+		public GameObject uiText = null;
+
+		private const float textWidthSize = 130f;
+		private const float textHeightSize = 35f;
+
+		public void spawnUIParts(ref GameObject canvas, ref Font font)
+		{
+			if (uiText != null)
+				return;
+			
+			uiText = new GameObject ("PauseText");
+			uiText.transform.SetParent (canvas.transform);
+
+			var text = uiText.AddComponent<Text> ();
+			text.color = Color.black;
+			text.font = font;
+			text.fontSize = 32;
+			text.horizontalOverflow = HorizontalWrapMode.Overflow;
+			text.verticalOverflow = VerticalWrapMode.Overflow;
+			text.text = "PAUSED";
+
+			var textTransform = uiText.GetComponent<RectTransform> ();
+			textTransform.anchorMin = new Vector2 (0.5f, 0.5f);
+			textTransform.anchorMax = new Vector2 (0.5f, 0.5f);
+			textTransform.pivot = new Vector2 (0.5f, 0.5f);
+			textTransform.anchoredPosition = Vector2.zero;
+			textTransform.sizeDelta = new Vector2 (textWidthSize, textHeightSize);
+		}
+
+		public void removeUIParts()
+		{
+			if (uiText == null)
+				return;
+
+			Destroy (uiText);
+			uiText = null;
 		}
 	}
 }

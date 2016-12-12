@@ -15,15 +15,15 @@ namespace Playish
 		private const String VERSION = "0.1";
 
 		// Events
-		public delegate void PlayishStateChanged (EventArgs e);
+		public delegate void PlayishStateChangedHandler (EventArgs e);
 		/// <summary>
 		/// Occurs when a playish console pauses the game.
 		/// </summary>
-		public event PlayishStateChanged playishPauseEvent;
+		public event PlayishStateChangedHandler playishPauseEvent;
 		/// <summary>
 		/// Occurs when a playish console resumes the game.
 		/// </summary>
-		public event PlayishStateChanged playishResumeEvent;
+		public event PlayishStateChangedHandler playishResumeEvent;
 
 		// Keep track of playish state
 		private bool consoleIsPaused = false;
