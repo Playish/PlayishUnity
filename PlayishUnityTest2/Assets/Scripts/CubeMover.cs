@@ -16,8 +16,9 @@ public class CubeMover : MonoBehaviour
 	public GameObject buttonright;
 
 	public String playerDeviceId = "";
+	public bool debugJoystick = false;
 
-	private PlayerManager playerManager;
+	private DeviceManager deviceManager;
 	private PlayishManager playishManager;
 
 	private Rigidbody rigidBody;
@@ -26,7 +27,7 @@ public class CubeMover : MonoBehaviour
 	// Use this for initialization
 	void Start ()
 	{
-		playerManager = PlayerManager.getInstance ();
+		deviceManager = DeviceManager.getInstance ();
 		playishManager = PlayishManager.getInstance ();
 
 		rigidBody = GetComponent<Rigidbody> ();
@@ -35,24 +36,34 @@ public class CubeMover : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
 	{
-		var player = playerManager.getPlayer (playerDeviceId);
-		if (player == null || !player.hasController () || playishManager.isConsolePaused ())
+		var device = deviceManager.getDevice (playerDeviceId);
+		if (device == null || !device.hasController () || playishManager.isConsolePaused ())
 		{
 			rigidBody.velocity = Vector3.zero;
 			return;
 		}
 
+		if (debugJoystick)
+		{
+			//playishManager.writeWebConsoleLog ("joystick-leftX: " + device.getIntInput("joystickX") + ", joystickY: " + device.getIntInput("joystickY"));
+		}
+
 		var newVelocity = new Vector3 (0, 0, 0);
 
 		var rotationInput = new Quaternion (
-			-player.getFloatInput ("rotationX"),
-			-player.getFloatInput ("rotationZ"),
-			-player.getFloatInput ("rotationY"),
-			player.getFloatInput ("rotationW"));
+			-device.getFloatInput ("rotationX"),
+			-device.getFloatInput ("rotationZ"),
+			-device.getFloatInput ("rotationY"),
+			device.getFloatInput ("rotationW"));
+
+		if (playerDeviceId == "pAX5kb1AbYqJyVE6HF7gjgTl6Jc5WhZGdtkutt15ZLswPLofddQZ1CudeNda994I")
+		{
+			playishManager.writeWebConsoleLog (string.Format("X:{0:0.00}, Y:{1:0.00}, Z:{2:0.00}, W:{3:0.00}", rotationInput.x, rotationInput.y, rotationInput.z, rotationInput.w));
+		}
 		
 		transform.rotation = rotationInput;
 
-		if (player.getBoolInput ("buttonleft"))
+		if (device.getBoolInput ("buttonleft"))
 		{
 			newVelocity.x = -1;
 			buttonleft.transform.localScale = new Vector3 (buttonleft.transform.localScale.x, 0.4f, buttonleft.transform.localScale.z);
@@ -62,7 +73,7 @@ public class CubeMover : MonoBehaviour
 			buttonleft.transform.localScale = new Vector3 (buttonleft.transform.localScale.x, 1f, buttonleft.transform.localScale.z);
 		}
 
-		if (player.getBoolInput ("buttonright"))
+		if (device.getBoolInput ("buttonright"))
 		{
 			newVelocity.x = 1;
 			buttonright.transform.localScale = new Vector3 (buttonright.transform.localScale.x, 0.4f, buttonright.transform.localScale.z);
@@ -72,7 +83,7 @@ public class CubeMover : MonoBehaviour
 			buttonright.transform.localScale = new Vector3 (buttonright.transform.localScale.x, 1f, buttonright.transform.localScale.z);
 		}
 
-		if (player.getBoolInput ("buttonup"))
+		if (device.getBoolInput ("buttonup"))
 		{
 			newVelocity.y = 1;
 			buttonup.transform.localScale = new Vector3 (buttonup.transform.localScale.x, 0.4f, buttonup.transform.localScale.z);
@@ -82,7 +93,7 @@ public class CubeMover : MonoBehaviour
 			buttonup.transform.localScale = new Vector3 (buttonup.transform.localScale.x, 1f, buttonup.transform.localScale.z);
 		}
 
-		if (player.getBoolInput ("buttondown"))
+		if (device.getBoolInput ("buttondown"))
 		{
 			newVelocity.y = -1;
 			buttondown.transform.localScale = new Vector3 (buttondown.transform.localScale.x, 0.4f, buttondown.transform.localScale.z);
@@ -92,7 +103,7 @@ public class CubeMover : MonoBehaviour
 			buttondown.transform.localScale = new Vector3 (buttondown.transform.localScale.x, 1f, buttondown.transform.localScale.z);
 		}
 
-		if (player.getBoolInput ("buttonback"))
+		if (device.getBoolInput ("buttonback"))
 		{
 			buttonback.transform.localScale = new Vector3 (buttonback.transform.localScale.x, 0.4f, buttonback.transform.localScale.z);
 		}
@@ -101,7 +112,7 @@ public class CubeMover : MonoBehaviour
 			buttonback.transform.localScale = new Vector3 (buttonback.transform.localScale.x, 1f, buttonback.transform.localScale.z);
 		}
 
-		if (player.getBoolInput ("buttonselect"))
+		if (device.getBoolInput ("buttonselect"))
 		{
 			buttonselect.transform.localScale = new Vector3 (buttonselect.transform.localScale.x, 0.4f, buttonselect.transform.localScale.z);
 		}
@@ -110,9 +121,9 @@ public class CubeMover : MonoBehaviour
 			buttonselect.transform.localScale = new Vector3 (buttonselect.transform.localScale.x, 1f, buttonselect.transform.localScale.z);
 		}
 
-		var accx = -player.getFloatInput ("accelerationX");
-		var accy = -player.getFloatInput ("accelerationZ");
-		var accz = -player.getFloatInput ("accelerationY");
+		var accx = -device.getFloatInput ("accelerationX");
+		var accy = -device.getFloatInput ("accelerationZ");
+		var accz = -device.getFloatInput ("accelerationY");
 
 		/*
 		newVelocity.x += accx * 1f;

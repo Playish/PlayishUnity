@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +20,7 @@ public class CubeSpawner : MonoBehaviour
 	private PausedText pausedText = new PausedText ();
 
 	// Playish references
-	private PlayerManager playerManager;
+	private DeviceManager deviceManager;
 	private PlayishManager playishManager;
 
 	// Controller cubes
@@ -28,40 +29,73 @@ public class CubeSpawner : MonoBehaviour
 	private int lastCubeControllerNumber = 0;
 
 
-	// Use this for initialization
-	void Start ()
+	private void Awake()
 	{
-		Application.runInBackground = true;
-
-		playerManager = PlayerManager.getInstance ();
-		playerManager.playerAddedEvent += onPlayerAdded;
-		playerManager.playerRemovedEvent += onPlayerRemoved;
-		playerManager.playersChangedEvent += onPlayersChanged;
+		deviceManager = DeviceManager.getInstance ();
+		deviceManager.deviceAddedEvent += onDeviceAdded;
+		deviceManager.deviceRemovedEvent += onDeviceRemoved;
+		deviceManager.deviceChangedEvent += onDevicesChanged;
 
 		playishManager = PlayishManager.getInstance ();
 		playishManager.playishPauseEvent += onBrowserPaused;
 		playishManager.playishResumeEvent += onBrowserResumed;
+	}
+
+	// Use this for initialization
+	private void Start ()
+	{
+		Application.runInBackground = true;
+		DontDestroyOnLoad (transform.gameObject);
 
 		// Send start controller
-		playishManager.changeController("PlayishRemoteController");
+		playishManager.changeController("PlayishDefaultController1");
+
+		int value1 = 50;
+		int value2 = 99;
+		float test = (float)value1 / (float)value2;
+		Debug.Log ("TESTING: " + test);
+	}
+
+	private void Update ()
+	{
+		if (Input.GetKeyUp (KeyCode.L))
+		{
+			if (SceneManager.GetActiveScene ().name == "Test1" || SceneManager.GetActiveScene().name == "Test3") {
+				SceneManager.LoadSceneAsync ("Test2", LoadSceneMode.Single);
+			} else {
+				SceneManager.LoadSceneAsync ("Test3", LoadSceneMode.Single);
+			}
+		}
+
+		if (Input.GetKeyUp (KeyCode.Z)) {
+			playishManager.changeController ("MyController1");
+		} else if (Input.GetKeyUp (KeyCode.X)) {
+			playishManager.changeController ("MyController2");
+		} else if (Input.GetKeyUp (KeyCode.C)) {
+			playishManager.changeController ("MyController3");
+		} else if (Input.GetKeyUp (KeyCode.I)) {
+			playishManager.changeController ("PlayishDefaultController1");
+		} else if (Input.GetKeyUp (KeyCode.O)) {
+			playishManager.changeController ("PlayishDefaultController2");
+		} else if (Input.GetKeyUp (KeyCode.P)) {
+			playishManager.changeController ("PlayishDefaultController3");
+		}
 	}
 
 
-	// ---- MARK: Player updates
+	// ---- MARK: Device updates
 
-	private void onPlayerAdded(PlayerManager.PlayerEventArgs e)
+	private void onDeviceAdded(DeviceManager.DeviceEventArgs e)
 	{
-		playishManager.writeWebConsoleLog ("onPlayerAdded deviceId: " + e.deviceId + ", players.count: " + playerManager.players.Count);
 		spawnCubeController (e.deviceId);
 	}
 
-	private void onPlayerRemoved(PlayerManager.PlayerEventArgs e)
+	private void onDeviceRemoved(DeviceManager.DeviceEventArgs e)
 	{
-		playishManager.writeWebConsoleLog ("onPlayerRemoved deviceId: " + e.deviceId + ", players.count: " + playerManager.players.Count);
 		removeCubeController (e.deviceId);
 	}
 
-	private void onPlayersChanged(PlayerManager.PlayerEventArgs e)
+	private void onDevicesChanged(DeviceManager.DeviceEventArgs e)
 	{}
 
 
@@ -69,12 +103,12 @@ public class CubeSpawner : MonoBehaviour
 
 	private void onBrowserPaused(EventArgs e)
 	{
-		pausedText.spawnUIParts (ref canvas, ref font);
+		//pausedText.spawnUIParts (ref canvas, ref font);
 	}
 
 	private void onBrowserResumed(EventArgs e)
 	{
-		pausedText.removeUIParts ();
+		//pausedText.removeUIParts ();
 	}
 
 
@@ -101,6 +135,7 @@ public class CubeSpawner : MonoBehaviour
 		var position = new Vector3 (transform.position.x, transform.position.y, transform.position.z);
 
 		var newCubeController = Instantiate<GameObject> (cubeControllerPrefab);
+		newCubeController.transform.SetParent (transform);
 		newCubeController.transform.position = position;
 
 		// Change color
@@ -118,6 +153,10 @@ public class CubeSpawner : MonoBehaviour
 		if (cubeMoverScript != null)
 		{
 			cubeMoverScript.playerDeviceId = playerDeviceId;
+			if (playerInfo.playerNumber == 1)
+			{
+				cubeMoverScript.debugJoystick = true;
+			}
 		}
 
 		cubeControllers.Add (playerDeviceId, newCubeController);
