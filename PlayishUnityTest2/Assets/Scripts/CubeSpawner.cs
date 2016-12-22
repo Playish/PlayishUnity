@@ -49,11 +49,6 @@ public class CubeSpawner : MonoBehaviour
 
 		// Send start controller
 		playishManager.changeController("PlayishDefaultController1");
-
-		int value1 = 50;
-		int value2 = 99;
-		float test = (float)value1 / (float)value2;
-		Debug.Log ("TESTING: " + test);
 	}
 
 	private void Update ()
@@ -108,6 +103,8 @@ public class CubeSpawner : MonoBehaviour
 
 	private void onBrowserResumed(EventArgs e)
 	{
+		// Keep in mind that your game has to be able to resume on it's own regardless
+		// of this event. At the moment there are no actions on the website that triggers this.
 		//pausedText.removeUIParts ();
 	}
 
@@ -153,10 +150,6 @@ public class CubeSpawner : MonoBehaviour
 		if (cubeMoverScript != null)
 		{
 			cubeMoverScript.playerDeviceId = playerDeviceId;
-			if (playerInfo.playerNumber == 1)
-			{
-				cubeMoverScript.debugJoystick = true;
-			}
 		}
 
 		cubeControllers.Add (playerDeviceId, newCubeController);

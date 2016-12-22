@@ -16,7 +16,6 @@ public class CubeMover : MonoBehaviour
 	public GameObject buttonright;
 
 	public String playerDeviceId = "";
-	public bool debugJoystick = false;
 
 	private DeviceManager deviceManager;
 	private PlayishManager playishManager;
@@ -37,15 +36,10 @@ public class CubeMover : MonoBehaviour
 	void Update ()
 	{
 		var device = deviceManager.getDevice (playerDeviceId);
-		if (device == null || !device.hasController () || playishManager.isConsolePaused ())
+		if (device == null || !device.hasController ())
 		{
 			rigidBody.velocity = Vector3.zero;
 			return;
-		}
-
-		if (debugJoystick)
-		{
-			//playishManager.writeWebConsoleLog ("joystick-leftX: " + device.getIntInput("joystickX") + ", joystickY: " + device.getIntInput("joystickY"));
 		}
 
 		var newVelocity = new Vector3 (0, 0, 0);
@@ -55,11 +49,6 @@ public class CubeMover : MonoBehaviour
 			-device.getFloatInput ("rotationZ"),
 			-device.getFloatInput ("rotationY"),
 			device.getFloatInput ("rotationW"));
-
-		if (playerDeviceId == "pAX5kb1AbYqJyVE6HF7gjgTl6Jc5WhZGdtkutt15ZLswPLofddQZ1CudeNda994I")
-		{
-			playishManager.writeWebConsoleLog (string.Format("X:{0:0.00}, Y:{1:0.00}, Z:{2:0.00}, W:{3:0.00}", rotationInput.x, rotationInput.y, rotationInput.z, rotationInput.w));
-		}
 		
 		transform.rotation = rotationInput;
 

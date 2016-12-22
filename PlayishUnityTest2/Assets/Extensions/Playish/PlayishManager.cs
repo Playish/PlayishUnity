@@ -21,12 +21,10 @@ namespace Playish
 		/// </summary>
 		public event PlayishStateChangedHandler playishPauseEvent;
 		/// <summary>
-		/// Occurs when a playish console resumes the game.
+		/// Occurs when a playish console sends remove event to the game. Make sure your game handles 
+		/// resume on it's own regardless of this event.
 		/// </summary>
 		public event PlayishStateChangedHandler playishResumeEvent;
-
-		// Keep track of playish state
-		private bool consoleIsPaused = false;
 
 
 		// ---- MARK: Setup
@@ -41,7 +39,6 @@ namespace Playish
 
 		private void Awake()
 		{
-			tag = "PlayishManagerTag";
 			if (currentInstance != null && this.GetHashCode () != currentInstance.GetHashCode ())
 			{
 				writeWebConsoleLog ("InvalidPlayishManager");
@@ -78,18 +75,6 @@ namespace Playish
 		}
 
 
-		// ---- MARK: Playish state
-
-		/// <summary>
-		/// Gets if the console is paused. "playishPauseEvent" and "playishResumeEvent" can also be 
-		/// helpful to keep track of the console state.
-		/// </summary>
-		public bool isConsolePaused()
-		{
-			return consoleIsPaused;
-		}
-
-
 		// ---- MARK: Update
 
 		#if UNITY_EDITOR
@@ -114,7 +99,6 @@ namespace Playish
 		/// </summary>
 		public void onPause()
 		{
-			consoleIsPaused = true;
 			if (playishPauseEvent != null)
 			{
 				playishPauseEvent (new EventArgs());
@@ -126,7 +110,6 @@ namespace Playish
 		/// </summary>
 		public void onResume()
 		{
-			consoleIsPaused = false;
 			if (playishResumeEvent != null)
 			{
 				playishResumeEvent (new EventArgs());
@@ -146,9 +129,6 @@ namespace Playish
 		/// </summary>
 		public void onDeviceSync(string data)
 		{
-			writeWebConsoleLog ("onDeviceSync: " + data);
-			Debug.Log ("onDeviceSync: " + data);
-
 			var deviceManager = DeviceManager.getInstance ();
 
 			var deviceIds = data.Split (new char[]{ ';' }, StringSplitOptions.RemoveEmptyEntries);
@@ -260,8 +240,6 @@ namespace Playish
 		{
 			#if UNITY_WEBGL
 
-			int count = GameObject.FindGameObjectsWithTag("PlayishManagerTag").Length;
-			writeWebConsoleLog("PlayishManagers: " + count);
 			Application.ExternalCall("PlayishUnityChangeControllerForAll", controllerName);
 
 			#endif
