@@ -43,7 +43,7 @@ You can use the device hashmap found in device manager to use as players. If you
 Player related info such as player number or objects in the game should be handled by the game.
 
 - Keep in mind
-If your game relies on the events fired by the device manager make sure to check if there are already devices connected first. Setup your event callbacks in the Awake part of your MonoBehaviour object. This way you will recieve the events that might get called when your object is about to start (the plugin will set the currently connected devices in the Start part).
+If your game relies on the events fired by the device manager make sure to check if there are already devices connected first. Setup your event callbacks in the Start (instance will not be available in Awake) part of your MonoBehaviour object.
 
 
 ## Getting input
