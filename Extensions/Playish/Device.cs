@@ -120,6 +120,62 @@ namespace Playish
 			return 0;
 		}
 
+		/// <summary>
+		/// Used to get the raw rotation from the input device.
+		/// </summary>
+		public Quaternion getRawRotationInput()
+		{
+			var rotationInput = new Quaternion (
+				getFloatInput ("rotationX"),
+				getFloatInput ("rotationY"),
+				getFloatInput ("rotationZ"),
+				getFloatInput ("rotationW"));
+			return rotationInput;
+		}
+
+		/// <summary>
+		/// Used to get rotation from the input device. The input is translated
+		/// to a more usable rotation.
+		/// </summary>
+		public Quaternion getRotationInput()
+		{
+			var rotationInput = new Quaternion (
+				-getFloatInput ("rotationX"),
+				-getFloatInput ("rotationZ"),
+				-getFloatInput ("rotationY"),
+				getFloatInput ("rotationW"));
+			return rotationInput;
+		}
+
+		/// <summary>
+		/// Gets input used when the device is held as a steering wheel and tilted left and right.
+		/// Returns input between -1.0f (left) to 1.0f (right).
+		/// </summary>
+		/// <returns>The steering wheel input. -1 to the left and 1 to the right.</returns>
+		/// <param name="rotationSize">Size of the rotation to count as full steering.</param>
+		public float getSteeringWheelInput(float rotationSize = 60f)
+		{
+			var rotationInput = getRotationInput();
+			var normalizedTurnValue = rotationInput.eulerAngles.x;
+
+			if (normalizedTurnValue > 180f)
+			{
+				normalizedTurnValue = normalizedTurnValue - 360f;
+			}
+
+			normalizedTurnValue = -(normalizedTurnValue / rotationSize);
+
+			if (normalizedTurnValue > 1.0f)
+			{
+				normalizedTurnValue = 1.0f;
+			}
+			else if (normalizedTurnValue < -1.0f)
+			{
+				normalizedTurnValue = -1.0f;
+			}
+			return normalizedTurnValue;
+		}
+
 
 		// ---- MARK: Parse and set input
 

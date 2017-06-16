@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using System.Linq;
+using PlayishUnityHost;
 
 
 namespace Playish
@@ -12,8 +13,9 @@ namespace Playish
 	{
 		// General
 		private static PlayishManager currentInstance = null;
-		private const String VERSION = "0.1.1";
+		private const String VERSION = "host_0.1.1";
 		private bool hasSentPluginLoaded = false;
+		
 
 		// Events
 		public delegate void PlayishStateChangedHandler (EventArgs e);
@@ -216,10 +218,12 @@ namespace Playish
 		/// </summary>
 		public void setUnityPlayishPluginLoaded()
 		{
-			#if UNITY_WEBGL
-
+#if UNITY_WEBGL
 			Application.ExternalCall("PlayishUnityPluginLoaded", VERSION);
+#endif
 
+#if UNITY_EDITOR
+			ServerConnection.getInstance().PlayishUnityPluginLoaded(VERSION);
 			#endif
 		}
 
@@ -228,10 +232,12 @@ namespace Playish
 		/// </summary>
 		public void changeController(String deviceId, String controllerName)
 		{
-			#if UNITY_WEBGL
-
+#if UNITY_WEBGL
 			Application.ExternalCall("PlayishUnityChangeController", deviceId, controllerName);
+#endif
 
+#if UNITY_EDITOR
+			ServerConnection.getInstance().PlayishUnityChangeController(deviceId, controllerName);
 			#endif
 		}
 
@@ -240,19 +246,23 @@ namespace Playish
 		/// </summary>
 		public void changeController(String controllerName)
 		{
-			#if UNITY_WEBGL
-
+#if UNITY_WEBGL
 			Application.ExternalCall("PlayishUnityChangeControllerForAll", controllerName);
+#endif
 
+#if UNITY_EDITOR
+			ServerConnection.getInstance().PlayishUnityChangeControllerForAll(controllerName);
 			#endif
 		}
 
 		public void writeWebConsoleLog(String message)
 		{
-			#if UNITY_WEBGL
-
+#if UNITY_WEBGL
 			Application.ExternalCall("PlayishUnityConsoleLog", message);
+#endif
 
+#if UNITY_EDITOR
+			ServerConnection.getInstance().PlayishUnityConsoleLog(message);
 			#endif
 		}
 
